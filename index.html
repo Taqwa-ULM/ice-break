@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tile Party - Cute Ice Breaking Hub</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Cute Gaming Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for Victories -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        :root {
+            --bg-sky: #85D7FF;
+            --wood-dark: #3D2314;
+            --wood-light: #8B5E3C;
+            --pop-yellow: #FFC800;
+            --pop-green: #73D216;
+            --pop-red: #FF4B4B;
+            --pop-blue: #1E90FF;
+            --card-cream: #FFFDEB;
+        }
+
+        body {
+            background-color: var(--bg-sky);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.3) 0%, transparent 25%);
+            color: var(--wood-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 3D Puffy Cartoon Game Cards */
+        .game-card {
+            background-color: var(--card-cream);
+            border: 4px solid var(--wood-dark);
+            border-radius: 24px;
+            box-shadow: 0 8px 0 var(--wood-dark);
+        }
+
+        .game-card-dark {
+            background-color: #2B1810;
+            color: #FFFDEB;
+            border: 4px solid var(--wood-dark);
+            border-radius: 24px;
+            box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        /* 3D Chunky Game Buttons */
+        .game-btn {
+            border: 3.5px solid var(--wood-dark);
+            border-radius: 20px;
+            box-shadow: 0 6px 0 var(--wood-dark);
+            font-weight: 700;
+            transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.15);
+        }
+
+        .game-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--wood-dark);
+        }
+
+        /* Avatar Selection Cards */
+        .avatar-box {
+            border: 3px solid var(--wood-dark);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #FFF;
+            box-shadow: 0 4px 0 var(--wood-dark);
+        }
+
+        .avatar-box.selected {
+            border-color: var(--wood-dark);
+            box-shadow: 0 0 0 4px var(--pop-yellow), 0 6px 0 var(--wood-dark);
+            transform: scale(1.08) translateY(-4px);
+            background: #E8F7FF;
+        }
+
+        /* Swinging Cracker Animation */
+        @keyframes swingPendulum {
+            0% { transform: rotate(-35deg); }
+            50% { transform: rotate(35deg); }
+            100% { transform: rotate(-35deg); }
+        }
+
+        .cracker-swing {
+            transform-origin: top center;
+            animation: swingPendulum 1.8s ease-in-out infinite;
+        }
+
+        /* Tug of War Strain Keyframes */
+        @keyframes strainLeft {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-14px) rotate(-4deg); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes strainRight {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(14px) rotate(4deg); }
+            100% { transform: translateX(0); }
+        }
+
+        .anim-pull-left { animation: strainLeft 0.25s ease; }
+        .anim-pull-right { animation: strainRight 0.25s ease; }
+
+        /* Cracker Slash & Shake Animations */
+        @keyframes crackerShake {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.03) rotate(-3deg); }
+            50% { transform: scale(0.97) rotate(3deg); }
+            75% { transform: scale(1.02) rotate(-1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .anim-crumb-shake {
+            animation: crackerShake 0.15s ease-in-out;
+        }
+
+        /* Floating Cloud Banner Animation */
+        @keyframes cloudFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-cloud { animation: cloudFloat 4s ease-in-out infinite; }
+
+        /* Custom Drag Input Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 36px;
+            width: 36px;
+            border-radius: 50%;
+            background: #FFC800;
+            border: 3.5px solid #3D2314;
+            cursor: pointer;
+            margin-top: -12px;
+            box-shadow: 0 4px 0 #3D2314;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 14px;
+            cursor: pointer;
+            background: #9CD03A;
+            border-radius: 10px;
+            border: 3px solid #3D2314;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col justify-between items-center p-3 sm:p-5 min-h-screen">
+
+    <header class="w-full max-w-2xl mb-3">
+        <div class="game-card bg-[#FFFAF0] p-3 flex items-center justify-between relative overflow-hidden">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-2xl bg-[#FFC800] border-3 border-[#3D2314] flex items-center justify-center text-xl shadow-sm">
+                    🎮
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold leading-none text-[#3D2314]">PARTY HUB</h1>
+                    <p class="text-[11px] font-semibold text-[#8B5E3C]">SERU-SERUAN KELOMPOK</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span id="roomCodeBadge" class="hidden font-bold bg-[#1E90FF] text-white px-3 py-1 rounded-xl border-3 border-[#3D2314] text-xs shadow-sm">
+                    CODE: ----
+                </span>
+                <button onclick="toggleAudio()" class="game-btn bg-[#FF5964] text-white w-9 h-9 flex items-center justify-center text-xs">
+                    <i id="soundIcon" class="fas fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-2xl flex-1 flex flex-col justify-center items-center my-auto">
+
+        <!-- VIEW 1: LANDING & CHARACTER SETUP -->
+        <section id="screenLanding" class="w-full max-w-md space-y-4 animate-cloud">
+            <!-- Hero Banner Card -->
+            <div class="game-card bg-[#FFC800] p-5 text-center relative overflow-hidden">
+                <div class="inline-block bg-white text-[#3D2314] font-bold text-[11px] px-3 py-1 rounded-full border-2 border-[#3D2314] mb-1">
+                    ✨ GAME ICE BREAKING KELOMPOK
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-black text-[#3D2314] drop-shadow-sm tracking-wide">
+                    ICE BREAKING<br><span class="text-[#1E90FF]">PARTY CRUSH</span>
+                </h2>
+                <p class="text-xs font-semibold text-[#5E4028] mt-1">Gampang, Cepat & Pasti Seru!</p>
+            </div>
+
+            <!-- Profile & Setup Card -->
+            <div class="game-card p-4 space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-[#3D2314] mb-1 uppercase tracking-wider">NAMA PANGGILAN</label>
+                    <input type="text" id="playerNameInput" placeholder="Contoh: Budi / Kiki" 
+                           class="w-full p-2.5 rounded-2xl border-3 border-[#3D2314] bg-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1E90FF]">
+                </div>
+
+                <!-- Avatar Selection Grid -->
+                <div>
+                    <label class="block text-xs font-bold text-[#3D2314] mb-1 uppercase tracking-wider">PILIH KARAKTER MUKAMU</label>
+                    <div id="avatarGrid" class="grid grid-cols-4 gap-2 p-2 bg-[#85D7FF]/30 rounded-2xl border-3 border-[#3D2314]">
+                        <!-- Populated dynamically via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Host Spectator Option & Action Buttons -->
+                <div class="pt-2 border-t-3 border-dashed border-[#3D2314]/20 space-y-2.5">
+                    <label class="flex items-center gap-2 cursor-pointer bg-[#FFF8E7] p-2.5 rounded-2xl border-3 border-[#3D2314] text-xs font-bold">
+                        <input type="checkbox" id="hostSpectatorCheck" class="w-4 h-4 accent-[#1E90FF] rounded">
+                        <span>👑 HOST SEBAGAI MC (SPECTATOR / MONITORING)</span>
+                    </label>
+
+                    <button onclick="createRoom()" class="w-full game-btn bg-[#73D216] hover:bg-[#62b610] text-white py-3 text-sm tracking-wide">
+                        <i class="fas fa-plus-circle mr-1"></i> BUAT ROOM PARTY BARU
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="partyCodeInput" placeholder="KODE PARTY" maxlength="6"
+                               class="w-2/3 p-2.5 rounded-2xl border-3 border-[#3D2314] bg-white text-center font-bold uppercase text-sm focus:outline-none">
+                        <button onclick="joinRoom()" class="w-1/3 game-btn bg-[#1E90FF] hover:bg-[#1374d8] text-white py-2.5 text-xs">
+                            MASUK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- VIEW 2: LOBBY & GROUP SELECTION -->
+        <section id="screenLobby" class="hidden w-full max-w-lg space-y-3">
+            <div class="game-card bg-[#1E90FF] text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+                <div>
+                    <span class="text-[10px] font-bold bg-white text-[#3D2314] px-2 py-0.5 rounded-full uppercase">RUANG TUNGGU</span>
+                    <h2 class="text-xl font-black mt-1">LOBBY KELOMPOK</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] block font-bold opacity-90">KODE LOBBY:</span>
+                    <span id="lobbyCodeDisplay" class="text-2xl font-black text-[#FFC800]">----</span>
+                </div>
+            </div>
+
+            <!-- Groups Listing Grid -->
+            <div class="game-card p-4 space-y-3">
+                <div class="flex justify-between items-center border-b-3 border-[#3D2314] pb-2">
+                    <h3 class="text-xs font-black text-[#3D2314]">
+                        <i class="fas fa-users text-[#1E90FF] mr-1"></i> KELOMPOK (MAKSIMAL 4 ORANG)
+                    </h3>
+                    <span class="text-[11px] font-bold text-gray-600">Bebas Pilih Kelompok</span>
+                </div>
+
+                <div id="groupsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto p-1">
+                    <!-- Dynamic Group Cards -->
+                </div>
+
+                <div class="pt-2 border-t-3 border-[#3D2314] flex justify-between items-center">
+                    <button onclick="leaveRoom()" class="game-btn bg-[#FF4B4B] text-white px-4 py-2 text-xs">
+                        <i class="fas fa-sign-out-alt mr-1"></i> KELUAR
+                    </button>
+
+                    <div id="hostControls" class="hidden">
+                        <button onclick="openGameModal()" class="game-btn bg-[#FFC800] text-[#3D2314] px-4 py-2 text-xs font-black animate-bounce">
+                            🎮 PILIH MINI GAME
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- GAME SELECTOR MODAL -->
+        <div id="gameModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="game-card bg-[#FFFAF0] max-w-sm w-full p-4 space-y-3 relative">
+                <button onclick="closeGameModal()" class="absolute top-3 right-3 game-btn bg-[#FF4B4B] text-white w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button>
+                
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-[#1E90FF] uppercase tracking-wider">GAME SELECTOR</span>
+                    <h2 class="text-xl font-black text-[#3D2314]">PILIH TANTANGAN</h2>
+                </div>
+
+                <div class="grid grid-cols-1 gap-2.5">
+                    <button onclick="startGame('tug_of_war')" class="game-card bg-[#FFF3C4] hover:bg-[#ffe380] p-3 text-left flex items-center gap-3">
+                        <div class="text-3xl bg-white p-2 rounded-2xl border-3 border-[#3D2314]">🪢</div>
+                        <div>
+                            <div class="font-black text-sm text-[#3D2314]">1. TARIK TAMBANG</div>
+                            <div class="text-xs font-bold text-gray-600">Adu cepat TAP TAP bareng tim!</div>
+                        </div>
+                    </button>
+
+                    <button onclick="startGame('cracker_eat')" class="game-card bg-[#E2F5FF] hover:bg-[#c4ecff] p-3 text-left flex items-center gap-3">
+                        <div class="text-3xl bg-white p-2 rounded-2xl border-3 border-[#3D2314]">💥</div>
+                        <div>
+                            <div class="font-black text-sm text-[#3D2314]">2. SLASH KRUPUK RAKSASA</div>
+                            <div class="text-xs font-bold text-gray-600">GESER/SLASH krupuk raksasa sampai hancur!</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- VIEW 3: GAME ARENA -->
+        <section id="screenArena" class="hidden w-full max-w-xl space-y-3">
+            <!-- Active Game Top Bar -->
+            <div class="game-card bg-[#FFC800] p-3 text-[#3D2314] flex justify-between items-center">
+                <div>
+                    <span id="activeGameTitle" class="font-black text-sm sm:text-base block">MINI GAME</span>
+                    <span id="activeGroupBadge" class="text-xs font-bold text-[#5E4028]">Kelompok: -</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[9px] font-bold block uppercase tracking-wider">SISA WAKTU</span>
+                    <span id="gameTimerDisplay" class="font-black text-2xl bg-white px-3 py-0.5 rounded-xl border-3 border-[#3D2314] text-[#FF4B4B]">20</span>
+                </div>
+            </div>
+
+            <!-- Host Spectator Bar -->
+            <div id="hostSpectatorBanner" class="hidden game-card-dark p-2.5 text-center text-xs font-bold flex justify-between items-center">
+                <span>👑 MODE MC / SPECTATOR (LIVE MONITOR)</span>
+                <button onclick="finishGameEarly()" class="game-btn bg-[#FF4B4B] text-white px-3 py-1 text-xs">
+                    ⚡ AKHIRI SEKARANG
+                </button>
+            </div>
+
+            <!-- Game Arena Canvas Box -->
+            <div class="game-card bg-[#FFFAF0] p-3 sm:p-4 min-h-[340px] flex flex-col justify-between items-center relative overflow-hidden">
+                
+                <div id="gameTugView" class="hidden w-full flex-1 flex flex-col justify-between items-center space-y-2">
+                    <div class="text-center w-full flex items-center justify-between px-1">
+                        <span id="tugLabelLeft" class="text-xs font-black bg-[#1E90FF] text-white px-2.5 py-1 rounded-xl border-2 border-[#3D2314]">TIM TIMUR: 50%</span>
+                        <span class="text-[11px] font-bold text-[#3D2314] bg-[#FFC800] px-2.5 py-1 rounded-full border-2 border-[#3D2314]">
+                            🔥 TAP SECEPAT MUNGKIN!
+                        </span>
+                        <span id="tugLabelRight" class="text-xs font-black bg-[#FF4B4B] text-white px-2.5 py-1 rounded-xl border-2 border-[#3D2314]">TIM BARAT: 50%</span>
+                    </div>
+
+                    <!-- Vector Animated Tug Scene Stage -->
+                    <div id="tugStageContainer" class="w-full relative bg-[#E2F5FF] rounded-2xl border-3 border-[#3D2314] p-2 overflow-hidden shadow-inner flex flex-col items-center justify-center min-h-[200px]">
+                        
+                        <!-- Floating Dust Effect Overlay -->
+                        <div id="tugDustContainer" class="absolute inset-0 pointer-events-none z-20"></div>
+
+                        <!-- Vector Tug Scene SVG -->
+                        <svg id="tugSvgScene" class="w-full h-44 sm:h-48 overflow-visible" viewBox="0 0 600 220" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#8B5E3C"/>
+                                    <stop offset="50%" stop-color="#C29263"/>
+                                    <stop offset="100%" stop-color="#8B5E3C"/>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Ground Line & Center Pit -->
+                            <path d="M 20 185 Q 300 180 580 185" stroke="#3D2314" stroke-width="5" stroke-linecap="round" fill="none" />
+                            <line x1="300" y1="35" x2="300" y2="185" stroke="#FF4B4B" stroke-width="3" stroke-dasharray="6 4" />
+                            <rect x="288" y="172" width="24" height="15" rx="4" fill="#FFC800" stroke="#3D2314" stroke-width="2" />
+                            <text x="300" y="183" font-size="9" font-weight="900" fill="#3D2314" text-anchor="middle">GARIS</text>
+
+                            <!-- DYNAMIC MOVING GROUP -->
+                            <g id="tugMovableGroup" style="transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);">
+                                
+                                <!-- MAIN ROPE -->
+                                <path d="M 40 125 L 560 125" stroke="url(#ropeGrad)" stroke-width="14" stroke-linecap="round" />
+                                <path d="M 40 125 L 560 125" stroke="#3D2314" stroke-width="2.5" stroke-dasharray="5 8" stroke-linecap="round" fill="none"/>
+
+                                <!-- CENTER RED RIBBON -->
+                                <g id="tugCenterRibbon" transform="translate(300, 125)">
+                                    <polygon points="0,0 -12,-20 12,-20" fill="#FF4B4B" stroke="#3D2314" stroke-width="2" />
+                                    <circle cx="0" cy="0" r="6" fill="#FFC800" stroke="#3D2314" stroke-width="2"/>
+                                </g>
+
+                                <!-- LEFT TEAM (BLUE) -->
+                                <g id="tugCharLeftGroup">
+                                    <g transform="translate(100, 75)">
+                                        <!-- Player 1 -->
+                                        <circle cx="20" cy="15" r="16" fill="#1E90FF" stroke="#3D2314" stroke-width="3"/>
+                                        <text x="20" y="21" font-size="16" text-anchor="middle">🦦</text>
+                                        <path d="M 20 31 L 20 65 L 5 100 M 20 65 L 35 100" stroke="#3D2314" stroke-width="7" stroke-linecap="round"/>
+                                        <path d="M 20 40 L 55 50" stroke="#3D2314" stroke-width="6" stroke-linecap="round"/>
+                                    </g>
+                                    <g transform="translate(170, 75)">
+                                        <!-- Player 2 -->
+                                        <circle cx="20" cy="15" r="16" fill="#73D216" stroke="#3D2314" stroke-width="3"/>
+                                        <text x="20" y="21" font-size="16" text-anchor="middle">🦊</text>
+                                        <path d="M 20 31 L 20 65 L 5 100 M 20 65 L 35 100" stroke="#3D2314" stroke-width="7" stroke-linecap="round"/>
+                                        <path d="M 20 40 L 55 50" stroke="#3D2314" stroke-width="6" stroke-linecap="round"/>
+                                    </g>
+                                </g>
+
+                                <!-- RIGHT TEAM (RED) -->
+                                <g id="tugCharRightGroup">
+                                    <g transform="translate(370, 75)">
+                                        <!-- Player 1 -->
+                                        <circle cx="20" cy="15" r="16" fill="#FF4B4B" stroke="#3D2314" stroke-width="3"/>
+                                        <text x="20" y="21" font-size="16" text-anchor="middle">🐻</text>
+                                        <path d="M 20 31 L 20 65 L 5 100 M 20 65 L 35 100" stroke="#3D2314" stroke-width="7" stroke-linecap="round"/>
+                                        <path d="M 20 40 L -15 50" stroke="#3D2314" stroke-width="6" stroke-linecap="round"/>
+                                    </g>
+                                    <g transform="translate(440, 75)">
+                                        <!-- Player 2 -->
+                                        <circle cx="20" cy="15" r="16" fill="#FFC800" stroke="#3D2314" stroke-width="3"/>
+                                        <text x="20" y="21" font-size="16" text-anchor="middle">🐼</text>
+                                        <path d="M 20 31 L 20 65 L 5 100 M 20 65 L 35 100" stroke="#3D2314" stroke-width="7" stroke-linecap="round"/>
+                                        <path d="M 20 40 L -15 50" stroke="#3D2314" stroke-width="6" stroke-linecap="round"/>
+                                    </g>
+                                </g>
+
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Progress Bar Indicator -->
+                    <div class="w-full bg-gray-200 h-5 rounded-xl border-3 border-[#3D2314] relative overflow-hidden flex items-center shadow-sm">
+                        <div id="tugBarLeft" class="absolute inset-y-0 left-0 bg-[#1E90FF] transition-all duration-100" style="width: 50%;"></div>
+                        <div id="tugBarRight" class="absolute inset-y-0 right-0 bg-[#FF4B4B] transition-all duration-100" style="width: 50%;"></div>
+                        <div id="tugMarker" class="absolute top-0 bottom-0 w-3 bg-[#FFC800] border-x-2 border-[#3D2314] transition-all duration-100" style="left: calc(50% - 6px);"></div>
+                    </div>
+
+                    <!-- Tap Action Button -->
+                    <button id="btnTugAction" onclick="handleTugTap()" class="game-btn w-full bg-[#FF4B4B] hover:bg-[#e03a3a] text-white text-lg sm:text-xl py-3.5 rounded-2xl active:scale-95 shadow-md flex items-center justify-center gap-2">
+                        <span>🪢</span> <span>TARIK! (TAP TAP CEPAT)</span>
+                    </button>
+                </div>
+
+                <!-- GIANT CRACKER MULTI-SLASH ARENA -->
+                <div id="gameCrackerView" class="hidden w-full flex-1 flex flex-col justify-between items-center space-y-2 select-none">
+                    <div class="bg-[#FFC800] text-[#3D2314] px-3 py-1 rounded-full border-2 border-[#3D2314] text-xs font-bold text-center">
+                        ⚔️ USAP / SLASH KRUPUK RAKSASA INI BARENG TIM!
+                    </div>
+
+                    <!-- Cracker Durability & Progress Bar -->
+                    <div class="w-full bg-gray-200 h-6 rounded-2xl border-3 border-[#3D2314] relative overflow-hidden flex items-center shadow-sm px-1">
+                        <div id="crackerHpBar" class="absolute inset-y-0 left-0 bg-[#73D216] transition-all duration-100 rounded-xl" style="width: 100%;"></div>
+                        <div class="relative w-full flex justify-between items-center px-3 text-[11px] font-black text-[#3D2314]">
+                            <span>KRUPUK HP</span>
+                            <span id="crackerHpText">100%</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Giant Cracker Slash Box -->
+                    <div id="giantCrackerContainer" 
+                         class="relative w-full h-56 border-3 border-[#3D2314] rounded-2xl flex items-center justify-center overflow-hidden bg-[#FFFDEB] cursor-crosshair touch-none select-none shadow-inner">
+                        
+                        <!-- Floating Crumb Particles Overlay -->
+                        <div id="crackerCrumbsContainer" class="absolute inset-0 pointer-events-none z-30"></div>
+                        
+                        <!-- SVG Slash Line Overlay -->
+                        <svg id="slashSvgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-20"></svg>
+
+                        <!-- GIANT CRACKER GRAPHIC -->
+                        <div id="giantCrackerBody" class="relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center transition-transform duration-75">
+                            
+                            <!-- Giant Cracker SVG Outer -->
+                            <svg class="w-full h-full drop-shadow-lg overflow-visible" viewBox="0 0 200 200">
+                                <defs>
+                                    <radialGradient id="crackerGrad" cx="30%" cy="30%" r="70%">
+                                        <stop offset="0%" stop-color="#FFF3C4"/>
+                                        <stop offset="60%" stop-color="#FFC800"/>
+                                        <stop offset="100%" stop-color="#E59B00"/>
+                                    </radialGradient>
+                                    <filter id="crispShadow" x="-10%" y="-10%" width="130%" height="130%">
+                                        <feDropShadow dx="0" dy="8" stdDeviation="2" flood-color="#3D2314" flood-opacity="0.3"/>
+                                    </filter>
+                                </defs>
+
+                                <!-- Giant Cracker Base Circle -->
+                                <circle cx="100" cy="100" r="85" fill="url(#crackerGrad)" stroke="#3D2314" stroke-width="6" filter="url(#crispShadow)"/>
+                                
+                                <!-- Bubbly Puffy Texture Holes -->
+                                <circle cx="65" cy="65" r="12" fill="#E59B00" opacity="0.35"/>
+                                <circle cx="135" cy="75" r="16" fill="#E59B00" opacity="0.35"/>
+                                <circle cx="85" cy="130" r="14" fill="#E59B00" opacity="0.35"/>
+                                <circle cx="125" cy="135" r="10" fill="#E59B00" opacity="0.35"/>
+                                <circle cx="100" cy="85" r="8" fill="#E59B00" opacity="0.25"/>
+
+                                <!-- Cracker Chili Flakes / Sesame Dots -->
+                                <circle cx="50" cy="100" r="3" fill="#FF4B4B"/>
+                                <circle cx="110" cy="50" r="3" fill="#FF4B4B"/>
+                                <circle cx="150" cy="110" r="3" fill="#FF4B4B"/>
+                                <circle cx="70" cy="150" r="3" fill="#FF4B4B"/>
+                                <circle cx="140" cy="150" r="3.5" fill="#3D2314"/>
+                                <circle cx="90" cy="100" r="3" fill="#3D2314"/>
+
+                                <!-- Dynamic Crack Paths (Revealed on Low Durability) -->
+                                <g id="crackerCrackLines" opacity="0">
+                                    <path d="M 100 15 L 95 65 L 115 110 L 105 185" stroke="#3D2314" stroke-width="5" stroke-linecap="round" fill="none"/>
+                                    <path d="M 15 100 L 65 95 L 120 105 L 185 95" stroke="#3D2314" stroke-width="5" stroke-linecap="round" fill="none"/>
+                                    <path d="M 40 40 L 80 80 M 160 40 L 120 80" stroke="#3D2314" stroke-width="4" stroke-linecap="round" fill="none"/>
+                                </g>
+                            </svg>
+
+                            <!-- Center Cracker Text Badge -->
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span id="crackerStatusBadge" class="bg-[#FF4B4B] text-white font-black text-sm px-3 py-1 rounded-full border-2 border-[#3D2314] shadow-md uppercase tracking-wider">
+                                    SLASH ME! ⚔️
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Group Slash Stats Indicator -->
+                    <div class="font-black text-sm text-[#3D2314] flex justify-between w-full px-2">
+                        <span>PERSENTASE HANCUR:</span>
+                        <span id="crackerScoreText" class="text-[#1E90FF] text-lg">0%</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <section id="screenLeaderboard" class="hidden w-full max-w-md space-y-3">
+            <div class="game-card bg-[#FFC800] p-4 text-center">
+                <span class="text-[10px] font-bold text-[#3D2314] uppercase tracking-wider">CHAMPIONS HALL</span>
+                <h2 class="text-3xl font-black text-[#3D2314]">🏆 KLASEMEN PARTY</h2>
+            </div>
+
+            <div class="game-card p-4 space-y-3">
+                <div id="leaderboardList" class="space-y-2">
+                    <!-- Dynamic ranking rows -->
+                </div>
+
+                <div id="hostNextControls" class="mt-3 border-t-3 border-[#3D2314] pt-3 text-center hidden">
+                    <button onclick="backToLobby()" class="game-btn bg-[#1E90FF] text-white px-6 py-2.5 text-xs font-bold">
+                        <i class="fas fa-redo mr-1"></i> MAIN LAGI / PILIH GAME LAIN
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="w-full max-w-2xl mt-3 text-center text-xs font-bold text-[#3D2314]/70">
+        <p>© ICE BREAKING PARTY HUB • TILE PARTY STYLE</p>
+    </footer>
+
+    <!-- Toast Notification Popup -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#3D2314] text-white px-4 py-2 rounded-2xl text-xs font-bold border-3 border-white shadow-lg hidden z-50">
+        Notification
+    </div>
+
+    <script>
+        const ANIMAL_AVATARS = [
+            { id: 0, name: 'Otter', icon: '🦦', bg: '#85D7FF' },
+            { id: 1, name: 'Bear', icon: '🐻', bg: '#FFC800' },
+            { id: 2, name: 'Fox', icon: '🦊', bg: '#FF5964' },
+            { id: 3, name: 'Panda', icon: '🐼', bg: '#FFFDEB' },
+            { id: 4, name: 'Bunny', icon: '🐰', bg: '#FFB7D5' },
+            { id: 5, name: 'Frog', icon: '🐸', bg: '#73D216' },
+            { id: 6, name: 'Cat', icon: '🐱', bg: '#FFD166' },
+            { id: 7, name: 'Raccoon', icon: '🦝', bg: '#B8C0C2' }
+        ];
+
+        let selectedAvatarIdx = 0;
+        let userId = 'usr_' + Math.random().toString(36).substring(2, 8);
+        let partyCode = null;
+        let isHost = false;
+        let isSpectator = false;
+        let currentGroupKey = 'Group 1';
+        let syncChannel = null;
+        let syncTimer = null;
+        let hostTimer = null;
+
+        // Slash Game Touch / Mouse Tracking Variables
+        let isSlashing = false;
+        let lastSlashPt = null;
+        let slashListenersInitialized = false;
+
+        // Audio Effects Setup
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundIcon').className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+            showToast(soundEnabled ? "Suara Aktif 🔊" : "Suara Diheningkan 🔇");
+        }
+
+        function playBeep(freq = 440, type = 'sine', duration = 0.08) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function renderAvatarPicker() {
+            const grid = document.getElementById('avatarGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            ANIMAL_AVATARS.forEach((av, idx) => {
+                const box = document.createElement('div');
+                box.className = `avatar-box p-2 text-center text-2xl flex items-center justify-center ${idx === selectedAvatarIdx ? 'selected' : ''}`;
+                box.style.backgroundColor = av.bg;
+                box.innerHTML = av.icon;
+                box.onclick = () => {
+                    selectedAvatarIdx = idx;
+                    renderAvatarPicker();
+                    playBeep(520, 'sine', 0.06);
+                };
+                grid.appendChild(box);
+            });
+        }
+
+        function getRoomData(code) {
+            const raw = localStorage.getItem('PARTY_ROOM_' + code);
+            return raw ? JSON.parse(raw) : null;
+        }
+
+        function saveRoomData(data) {
+            localStorage.setItem('PARTY_ROOM_' + data.code, JSON.stringify(data));
+            if (syncChannel) syncChannel.postMessage(data);
+        }
+
+        function setupSyncChannel(code) {
+            if (syncChannel) syncChannel.close();
+            syncChannel = new BroadcastChannel('PARTY_CHANNEL_' + code);
+
+            syncChannel.onmessage = (e) => {
+                if (e.data && e.data.code === partyCode) {
+                    onStateUpdated(e.data);
+                }
+            };
+
+            if (syncTimer) clearInterval(syncTimer);
+            syncTimer = setInterval(() => {
+                if (partyCode) {
+                    const data = getRoomData(partyCode);
+                    if (data) onStateUpdated(data);
+                }
+            }, 300);
+        }
+
+        function createRoom() {
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) return showToast("Isi nama panggilannya dulu ya! 😊");
+
+            const isSpec = document.getElementById('hostSpectatorCheck')?.checked || false;
+            const code = Math.floor(1000 + Math.random() * 9000).toString();
+            partyCode = code;
+            isHost = true;
+            isSpectator = isSpec;
+
+            const roomState = {
+                code: code,
+                hostId: userId,
+                hostIsSpectator: isSpec,
+                status: 'lobby',
+                currentGame: null,
+                timer: 20,
+                groups: {
+                    "Group 1": isSpec ? [] : [{ id: userId, name: name, avatar: selectedAvatarIdx }],
+                    "Group 2": [],
+                    "Group 3": [],
+                    "Group 4": []
+                },
+                scores: { "Group 1": 0, "Group 2": 0, "Group 3": 0, "Group 4": 0 }
+            };
+
+            currentGroupKey = isSpec ? null : "Group 1";
+            saveRoomData(roomState);
+            setupSyncChannel(code);
+            showToast(`Room Party ${code} Berhasil Dibuat! 🎉`);
+            switchScreen('screenLobby');
+        }
+
+        function joinRoom() {
+            const name = document.getElementById('playerNameInput').value.trim();
+            const code = document.getElementById('partyCodeInput').value.trim().toUpperCase();
+
+            if (!name) return showToast("Isi nama kamu dulu!");
+            if (!code || code.length < 4) return showToast("Masukkan Kode Party!");
+
+            const state = getRoomData(code);
+            if (!state) return showToast("Room Party tidak ditemukan!");
+
+            partyCode = code;
+            isHost = (state.hostId === userId);
+            isSpectator = isHost && state.hostIsSpectator;
+
+            let myGroup = null;
+            for (let g in state.groups) {
+                if (state.groups[g].some(p => p.id === userId)) {
+                    myGroup = g;
+                    break;
+                }
+            }
+
+            if (!myGroup && !isSpectator) {
+                const keys = ["Group 1", "Group 2", "Group 3", "Group 4"];
+                for (let k of keys) {
+                    if (state.groups[k].length < 4) {
+                        myGroup = k;
+                        break;
+                    }
+                }
+                if (!myGroup) myGroup = "Group 1";
+                state.groups[myGroup].push({ id: userId, name: name, avatar: selectedAvatarIdx });
+                saveRoomData(state);
+            }
+
+            currentGroupKey = isSpectator ? null : myGroup;
+            setupSyncChannel(code);
+            showToast(`Masuk ke Room ${code}! 🍃`);
+            switchScreen('screenLobby');
+        }
+
+        function onStateUpdated(data) {
+            document.getElementById('roomCodeBadge').innerText = `CODE: ${data.code}`;
+            document.getElementById('roomCodeBadge').classList.remove('hidden');
+
+            isHost = (data.hostId === userId);
+            isSpectator = isHost && data.hostIsSpectator;
+
+            updateLobbyView(data);
+
+            if (data.status === 'lobby') {
+                switchScreen('screenLobby');
+                if (crackerMunchInterval) clearInterval(crackerMunchInterval);
+            } else if (data.status === 'playing') {
+                switchScreen('screenArena');
+                renderActiveGame(data);
+            } else if (data.status === 'leaderboard') {
+                switchScreen('screenLeaderboard');
+                renderLeaderboardView(data);
+                if (crackerMunchInterval) clearInterval(crackerMunchInterval);
+            }
+        }
+
+        function updateLobbyView(data) {
+            document.getElementById('lobbyCodeDisplay').innerText = data.code;
+            document.getElementById('hostControls').classList.toggle('hidden', !isHost);
+
+            const grid = document.getElementById('groupsGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const keys = ["Group 1", "Group 2", "Group 3", "Group 4"];
+            keys.forEach(gKey => {
+                const members = data.groups[gKey] || [];
+                const isMyGroup = (currentGroupKey === gKey);
+
+                const cardHtml = `
+                    <div class="game-card ${isMyGroup ? 'bg-[#FFF3C4]' : 'bg-white'} p-3 flex flex-col justify-between space-y-2">
+                        <div class="flex justify-between items-center border-b-2 border-[#3D2314] pb-1">
+                            <span class="font-black text-xs text-[#1E90FF]">${gKey}</span>
+                            <span class="text-[10px] font-bold bg-[#3D2314] text-white px-2 py-0.5 rounded-full">${members.length}/4</span>
+                        </div>
+                        <div class="space-y-1 text-xs">
+                            ${members.map(m => {
+                                const av = ANIMAL_AVATARS[m.avatar] || ANIMAL_AVATARS[0];
+                                return `
+                                    <div class="flex items-center gap-2 p-1 rounded-xl bg-gray-50 border-2 border-[#3D2314]">
+                                        <span>${av.icon}</span>
+                                        <span class="font-bold text-xs text-[#3D2314]">${m.name} ${m.id === userId ? '(Kamu)' : ''}</span>
+                                    </div>
+                                `;
+                            }).join('') || '<span class="text-gray-400 italic text-[11px]">Belum ada anggota</span>'}
+                        </div>
+                        ${!isMyGroup && members.length < 4 && !isSpectator ? `
+                            <button onclick="switchGroup('${gKey}')" class="game-btn bg-[#73D216] text-white py-1 text-[11px]">
+                                PINDAH KE SINI
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            });
+        }
+
+        function switchGroup(targetGroup) {
+            const state = getRoomData(partyCode);
+            if (!state) return;
+
+            const name = document.getElementById('playerNameInput').value.trim() || 'Player';
+            for (let g in state.groups) {
+                state.groups[g] = state.groups[g].filter(p => p.id !== userId);
+            }
+
+            if (state.groups[targetGroup].length < 4) {
+                state.groups[targetGroup].push({ id: userId, name: name, avatar: selectedAvatarIdx });
+                currentGroupKey = targetGroup;
+                saveRoomData(state);
+                showToast(`Pindah ke ${targetGroup}!`);
+            }
+        }
+
+        function openGameModal() { document.getElementById('gameModal').classList.remove('hidden'); }
+        function closeGameModal() { document.getElementById('gameModal').classList.add('hidden'); }
+
+        function startGame(type) {
+            closeGameModal();
+            if (!isHost || !partyCode) return;
+
+            const titles = {
+                'tug_of_war': '🪢 TARIK TAMBANG KELOMPOK',
+                'cracker_eat': '💥 SLASH KRUPUK RAKSASA'
+            };
+
+            const state = getRoomData(partyCode);
+            state.status = 'playing';
+            state.timer = 20;
+            state.currentGame = {
+                type: type,
+                title: titles[type],
+                tugPos: 50,
+                crackerScores: { 'Group 1': 0, 'Group 2': 0, 'Group 3': 0, 'Group 4': 0 }
+            };
+
+            saveRoomData(state);
+
+            if (hostTimer) clearInterval(hostTimer);
+            hostTimer = setInterval(() => {
+                const s = getRoomData(partyCode);
+                if (!s || s.status !== 'playing') {
+                    clearInterval(hostTimer);
+                    return;
+                }
+                s.timer--;
+                if (s.timer <= 0) {
+                    clearInterval(hostTimer);
+                    finishGame(s);
+                } else {
+                    saveRoomData(s);
+                }
+            }, 1000);
+        }
+
+        function renderActiveGame(data) {
+            const game = data.currentGame;
+            if (!game) return;
+
+            document.getElementById('activeGameTitle').innerText = game.title;
+            document.getElementById('gameTimerDisplay').innerText = data.timer;
+            
+            const badge = document.getElementById('activeGroupBadge');
+            badge.innerText = isSpectator ? "Status: MC / Spectator" : `Kelompok Kamu: ${currentGroupKey || 'Group 1'}`;
+
+            document.getElementById('hostSpectatorBanner').classList.toggle('hidden', !isSpectator);
+
+            document.getElementById('gameTugView').classList.add('hidden');
+            document.getElementById('gameCrackerView').classList.add('hidden');
+
+            if (game.type === 'tug_of_war') {
+                document.getElementById('gameTugView').classList.remove('hidden');
+                const pos = game.tugPos || 50;
+                
+                document.getElementById('tugBarLeft').style.width = `${pos}%`;
+                document.getElementById('tugBarRight').style.width = `${100 - pos}%`;
+                document.getElementById('tugMarker').style.left = `calc(${pos}% - 6px)`;
+                document.getElementById('tugLabelLeft').innerText = `TIM TIMUR: ${Math.round(pos)}%`;
+                document.getElementById('tugLabelRight').innerText = `TIM BARAT: ${Math.round(100 - pos)}%`;
+                
+                const shiftX = ((pos - 50) / 50) * 160; 
+                const movableGroup = document.getElementById('tugMovableGroup');
+                if (movableGroup) {
+                    movableGroup.style.transform = `translateX(${shiftX}px)`;
+                }
+
+                document.getElementById('btnTugAction').classList.toggle('hidden', isSpectator);
+
+            } else if (game.type === 'cracker_eat') {
+                document.getElementById('gameCrackerView').classList.remove('hidden');
+                const rawScore = (game.crackerScores && game.crackerScores[currentGroupKey]) || 0;
+                const destroyedPct = Math.min(100, Math.round(rawScore));
+                const hpPct = Math.max(0, 100 - destroyedPct);
+
+                document.getElementById('crackerHpBar').style.width = `${hpPct}%`;
+                document.getElementById('crackerHpText').innerText = `${hpPct}%`;
+                document.getElementById('crackerScoreText').innerText = `${destroyedPct}% HANCUR`;
+
+                // Update Crack Path Visibility based on destruction level
+                const crackLines = document.getElementById('crackerCrackLines');
+                if (crackLines) {
+                    crackLines.setAttribute('opacity', (destroyedPct / 100).toFixed(2));
+                }
+
+                const statusBadge = document.getElementById('crackerStatusBadge');
+                if (statusBadge) {
+                    if (hpPct <= 0) {
+                        statusBadge.innerText = '💥 HANCUR LULUH!';
+                        statusBadge.className = 'bg-[#73D216] text-white font-black text-sm px-3 py-1 rounded-full border-2 border-[#3D2314] shadow-md uppercase tracking-wider animate-bounce';
+                    } else if (hpPct < 40) {
+                        statusBadge.innerText = '⚠️ RETAK PARAH!';
+                        statusBadge.className = 'bg-[#FF4B4B] text-white font-black text-sm px-3 py-1 rounded-full border-2 border-[#3D2314] shadow-md uppercase tracking-wider';
+                    } else {
+                        statusBadge.innerText = '⚔️ SLASH ME!';
+                        statusBadge.className = 'bg-[#FF4B4B] text-white font-black text-sm px-3 py-1 rounded-full border-2 border-[#3D2314] shadow-md uppercase tracking-wider';
+                    }
+                }
+
+                if (!slashListenersInitialized) {
+                    initSlashListeners();
+                }
+            }
+        }
+
+        function initSlashListeners() {
+            const container = document.getElementById('giantCrackerContainer');
+            if (!container) return;
+
+            slashListenersInitialized = true;
+
+            const getPoint = (e) => {
+                const rect = container.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            };
+
+            const startSlash = (e) => {
+                if (isSpectator) return;
+                isSlashing = true;
+                lastSlashPt = getPoint(e);
+            };
+
+            const moveSlash = (e) => {
+                if (!isSlashing || !lastSlashPt || isSpectator) return;
+                const currentPt = getPoint(e);
+
+                const dx = currentPt.x - lastSlashPt.x;
+                const dy = currentPt.y - lastSlashPt.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > 12) {
+                    // Trigger Slash Hit!
+                    processSlashHit(lastSlashPt, currentPt, dist);
+                    lastSlashPt = currentPt;
+                }
+            };
+
+            const endSlash = () => {
+                isSlashing = false;
+                lastSlashPt = null;
+            };
+
+            container.addEventListener('mousedown', startSlash);
+            container.addEventListener('mousemove', moveSlash);
+            window.addEventListener('mouseup', endSlash);
+
+            container.addEventListener('touchstart', (e) => { startSlash(e); }, { passive: true });
+            container.addEventListener('touchmove', (e) => { moveSlash(e); }, { passive: true });
+            window.addEventListener('touchend', endSlash);
+        }
+
+        function processSlashHit(pt1, pt2, dist) {
+            const state = getRoomData(partyCode);
+            if (!state || state.status !== 'playing' || !state.currentGame) return;
+
+            // Damage cracker health based on slash distance
+            const damage = Math.min(4.5, (dist / 18));
+            const currentVal = state.currentGame.crackerScores[currentGroupKey] || 0;
+            if (currentVal >= 100) return;
+
+            state.currentGame.crackerScores[currentGroupKey] = Math.min(100, currentVal + damage);
+            saveRoomData(state);
+
+            // Audio Crunch Effect
+            playBeep(300 + Math.random() * 250, 'sawtooth', 0.04);
+
+            // Visual Cracker Body Shake
+            const crackerBody = document.getElementById('giantCrackerBody');
+            if (crackerBody) {
+                crackerBody.classList.remove('anim-crumb-shake');
+                void crackerBody.offsetWidth; // Trigger reflow
+                crackerBody.classList.add('anim-crumb-shake');
+            }
+
+            // Draw Temporary Slash Trail Line
+            drawSlashLine(pt1, pt2);
+
+            // Spawn Flying Crumb Particles & Crunch Popups
+            spawnCrumbs(pt2);
+        }
+
+        function drawSlashLine(p1, p2) {
+            const svg = document.getElementById('slashSvgCanvas');
+            if (!svg) return;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', p1.x);
+            line.setAttribute('y1', p1.y);
+            line.setAttribute('x2', p2.x);
+            line.setAttribute('y2', p2.y);
+            line.setAttribute('stroke', '#FFC800');
+            line.setAttribute('stroke-width', '6');
+            line.setAttribute('stroke-linecap', 'round');
+            line.setAttribute('style', 'filter: drop-shadow(0 0 4px #FF4B4B); transition: opacity 0.2s ease-out;');
+
+            svg.appendChild(line);
+
+            setTimeout(() => {
+                line.style.opacity = '0';
+                setTimeout(() => line.remove(), 200);
+            }, 100);
+        }
+
+        function spawnCrumbs(pt) {
+            const container = document.getElementById('crackerCrumbsContainer');
+            if (!container) return;
+
+            // Spawn 2 crumb particles
+            for (let i = 0; i < 2; i++) {
+                const crumb = document.createElement('div');
+                const size = Math.floor(6 + Math.random() * 10);
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 20 + Math.random() * 40;
+                const tx = Math.cos(angle) * speed;
+                const ty = Math.sin(angle) * speed;
+
+                crumb.className = 'absolute rounded-md bg-[#FFC800] border-2 border-[#3D2314] pointer-events-none shadow-sm';
+                crumb.style.width = `${size}px`;
+                crumb.style.height = `${size}px`;
+                crumb.style.left = `${pt.x}px`;
+                crumb.style.top = `${pt.y}px`;
+                crumb.style.transition = 'transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 0.3s ease-out';
+
+                container.appendChild(crumb);
+
+                requestAnimationFrame(() => {
+                    crumb.style.transform = `translate(${tx}px, ${ty}px) rotate(${Math.random() * 360}deg) scale(0.5)`;
+                    crumb.style.opacity = '0';
+                });
+
+                setTimeout(() => crumb.remove(), 320);
+            }
+
+            // Occasional Slash Text Popup
+            if (Math.random() > 0.6) {
+                const txt = document.createElement('div');
+                txt.className = 'absolute font-black text-xs text-[#FF4B4B] bg-white px-2 py-0.5 rounded-full border-2 border-[#3D2314] shadow-md pointer-events-none z-40';
+                txt.innerText = Math.random() > 0.5 ? 'CRUNCH! 💥' : 'SLASH! ⚔️';
+                txt.style.left = `${pt.x - 20}px`;
+                txt.style.top = `${pt.y - 20}px`;
+                txt.style.transition = 'transform 0.35s ease-out, opacity 0.35s ease-out';
+
+                container.appendChild(txt);
+
+                requestAnimationFrame(() => {
+                    txt.style.transform = 'translateY(-24px) scale(1.1)';
+                    txt.style.opacity = '0';
+                });
+
+                setTimeout(() => txt.remove(), 360);
+            }
+        }
+
+        function handleTugTap() {
+            if (isSpectator) return;
+            playBeep(350, 'square', 0.05);
+            const state = getRoomData(partyCode);
+            if (!state || !state.currentGame) return;
+
+            const isLeftTeam = (currentGroupKey === 'Group 1' || currentGroupKey === 'Group 3');
+            let delta = isLeftTeam ? -2.5 : 2.5;
+            state.currentGame.tugPos = Math.max(5, Math.min(95, (state.currentGame.tugPos || 50) + delta));
+            saveRoomData(state);
+
+            spawnTugDust(isLeftTeam);
+        }
+
+        function spawnTugDust(isLeftTeam) {
+            const container = document.getElementById('tugDustContainer');
+            if (!container) return;
+            
+            const dust = document.createElement('div');
+            dust.className = 'absolute font-black text-xs text-[#FFC800] bg-[#3D2314] text-white px-2 py-0.5 rounded-full shadow-md pointer-events-none transition-all duration-300';
+            dust.innerText = isLeftTeam ? 'PULL! ⬅️' : '➡️ PULL!';
+            dust.style.left = isLeftTeam ? '25%' : '70%';
+            dust.style.top = `${40 + Math.random() * 30}%`;
+
+            container.appendChild(dust);
+            setTimeout(() => dust.remove(), 400);
+        }
+
+        function finishGameEarly() {
+            const state = getRoomData(partyCode);
+            if (state) finishGame(state);
+        }
+
+        function finishGame(state) {
+            const game = state.currentGame;
+            if (game) {
+                if (game.type === 'tug_of_war') {
+                    if (game.tugPos < 50) {
+                        state.scores['Group 1'] += 50; state.scores['Group 3'] += 50;
+                    } else {
+                        state.scores['Group 2'] += 50; state.scores['Group 4'] += 50;
+                    }
+                } else if (game.type === 'cracker_eat') {
+                    for (let g in game.crackerScores) state.scores[g] += Math.round(game.crackerScores[g]);
+                }
+            }
+
+            state.status = 'leaderboard';
+            saveRoomData(state);
+        }
+
+        function renderLeaderboardView(data) {
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            }
+
+            const list = document.getElementById('leaderboardList');
+            if (!list) return;
+            list.innerHTML = '';
+
+            const scores = data.scores || {};
+            const sorted = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+            const medals = ["🥇 JUARA 1", "🥈 JUARA 2", "🥉 JUARA 3", "🏅 JUARA 4"];
+            const bgs = ["bg-[#FFC800]", "bg-[#1E90FF] text-white", "bg-[#73D216] text-white", "bg-gray-100"];
+
+            sorted.forEach((gKey, idx) => {
+                const isMyGroup = (currentGroupKey === gKey);
+                const itemHtml = `
+                    <div class="game-card ${bgs[idx]} p-3 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold bg-[#3D2314] text-white px-2 py-0.5 rounded-full">${medals[idx]}</span>
+                            <span class="font-black text-sm block mt-1">${gKey} ${isMyGroup ? '(Kelompokmu)' : ''}</span>
+                            <span class="text-[11px] opacity-80 font-bold">
+                                ${(data.groups[gKey] || []).map(p => p.name).join(', ') || 'Tidak ada anggota'}
+                            </span>
+                        </div>
+                        <span class="font-black text-xl bg-white text-[#3D2314] px-3 py-1 rounded-xl border-2 border-[#3D2314]">
+                            ${scores[gKey]} PTS
+                        </span>
+                    </div>
+                `;
+                list.innerHTML += itemHtml;
+            });
+
+            document.getElementById('hostNextControls').classList.toggle('hidden', !isHost);
+        }
+
+        function backToLobby() {
+            const state = getRoomData(partyCode);
+            if (!state || !isHost) return;
+            state.status = 'lobby';
+            saveRoomData(state);
+        }
+
+        function leaveRoom() {
+            partyCode = null;
+            document.getElementById('roomCodeBadge').classList.add('hidden');
+            switchScreen('screenLanding');
+            showToast("Keluar dari party.");
+        }
+
+        function switchScreen(id) {
+            ['screenLanding', 'screenLobby', 'screenArena', 'screenLeaderboard'].forEach(s => {
+                const elem = document.getElementById(s);
+                if (elem) elem.classList.add('hidden');
+            });
+            const active = document.getElementById(id);
+            if (active) active.classList.remove('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2200);
+        }
+
+        window.onload = function() {
+            renderAvatarPicker();
+        };
+    </script>
+</body>
+</html>
